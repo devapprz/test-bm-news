@@ -16,6 +16,9 @@ android {
     namespace 'com.yusuf.bankmandiri.newsapps'
     compileSdk 33
 
+    buildFeatures {
+        compose true
+    }
     defaultConfig {
         applicationId "com.yusuf.bankmandiri.newsapps"
         minSdk 21
