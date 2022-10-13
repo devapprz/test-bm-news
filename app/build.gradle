@@ -23,8 +23,8 @@ android {
         versionCode 1
         versionName "1.0"
 
-//        buildConfigField "String", "API_KEY", properties.getProperty("api.key")
-//        buildConfigField "String", "API_URL", properties.getProperty("api.url")
+        buildConfigField "String", "API_KEY", properties.getProperty("api.key")
+        buildConfigField "String", "API_URL", properties.getProperty("api.url")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
