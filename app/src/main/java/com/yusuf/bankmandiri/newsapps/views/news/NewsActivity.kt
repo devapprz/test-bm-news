@@ -30,6 +30,7 @@ import coil.request.ImageRequest
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
+import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
 import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.news.NewsViewModel
 import com.yusuf.bankmandiri.newsapps.utils.CommonConstant
@@ -48,9 +49,9 @@ class NewsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var textFilter by remember {
-                mutableStateOf(CommonConstant.DEFAULT_SOURCE)
-            }
+            val isSearch = remember { mutableStateOf(false) }
+            val textSearch = remember { mutableStateOf<String?>(null) }
+            var textFilter by remember { mutableStateOf(CommonConstant.DEFAULT_SOURCE) }
             val newsViewModel = viewModel<NewsViewModel>()
             val newsState by newsViewModel.state.collectAsState()
             val scaffoldState = rememberScaffoldState()
@@ -60,21 +61,43 @@ class NewsActivity : AppCompatActivity() {
                 onResult = { result ->
                     if (result.resultCode == 200) {
                         textFilter = result.data?.getStringExtra("SOURCE").orEmpty()
-                        mNewsJob = newsViewModel.find(textFilter)
+                        mNewsJob = newsViewModel.find(null, textFilter)
                     }
                 }
             )
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(text = "News Apps")
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        backgroundColor = Color.White,
-                        contentColor = Color.Black
-                    )
+                    if (isSearch.value) {
+                        SearchInput(
+                            isSearch = isSearch,
+                            textSearch = textSearch,
+                            onClose = {
+                                mNewsJob = newsViewModel.find(null, textFilter)
+                            }
+                        ) {
+                            mNewsJob = newsViewModel.find(it, textFilter)
+                        }
+                    } else {
+                        TopAppBar(
+                            title = {
+                                Text(text = "News Apps")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            backgroundColor = Color.White,
+                            contentColor = Color.Black,
+                            actions = {
+                                IconButton(onClick = {
+                                    isSearch.value = true
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_round_search_24),
+                                        contentDescription = "Search"
+                                    )
+                                }
+                            }
+                        )
+                    }
                 },
                 scaffoldState = scaffoldState
             ) {
@@ -82,7 +105,7 @@ class NewsActivity : AppCompatActivity() {
                     SwipeRefresh(
                         modifier = Modifier.fillMaxSize(),
                         state = swipeState,
-                        onRefresh = { mNewsJob = newsViewModel.find(textFilter) }
+                        onRefresh = { mNewsJob = newsViewModel.find(textSearch.value, textFilter) }
                     ) {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize()
@@ -176,7 +199,7 @@ class NewsActivity : AppCompatActivity() {
                             .padding(bottom = 24.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_round_search_24),
+                            painter = painterResource(id = R.drawable.ic_round_filter_alt_24),
                             contentDescription = textFilter,
                             colorFilter = ColorFilter.tint(color = Color.White)
                         )
@@ -200,7 +223,8 @@ class NewsActivity : AppCompatActivity() {
             })
             LaunchedEffect(
                 key1 = true,
-                block = { mNewsJob = newsViewModel.find(textFilter) })
+                block = { mNewsJob = newsViewModel.find(null, textFilter) }
+            )
         }
     }
 

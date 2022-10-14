@@ -10,12 +10,12 @@ constructor(
     private val newsRemote: NewsRemote
 ) {
 
-    fun find(source: String?, page: Int) =
+    fun find(search: String?, source: String, page: Int) =
         newsRemote.find(
+            search = search,
             source = source
-                ?.lowercase()
-                ?.replace(" ", "-")
-                .orEmpty(),
+                .lowercase()
+                .replace(" ", "-"),
             page = page,
             pageSize = 10
         )
