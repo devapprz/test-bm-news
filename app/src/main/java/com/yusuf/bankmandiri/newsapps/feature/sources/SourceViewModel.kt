@@ -33,4 +33,17 @@ constructor(
             }
     }
 
+    fun find(search: String?) = viewModelScope.launch(Dispatchers.IO) {
+        sourceRepository.find(search = search)
+            .onStart {
+                _state.update { SourceState(isLoading = true) }
+            }
+            .catch { error ->
+                _state.update { SourceState(messages = error.message) }
+            }
+            .collectLatest { collect ->
+                _state.update { SourceState(sources = collect) }
+            }
+    }
+
 }
