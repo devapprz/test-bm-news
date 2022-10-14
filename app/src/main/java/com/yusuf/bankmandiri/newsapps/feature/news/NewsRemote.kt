@@ -16,14 +16,8 @@ constructor(
     private val context: Context
 ) {
 
-    fun find(source: String?, page: Int, pageSize: Int) = "v2/top-headlines"
-        .httpGet(
-            listOfNotNull(
-                source?.let { "source" to it },
-                "page" to page,
-                "pageSize" to pageSize
-            )
-        )
+    fun find(source: String, page: Int, pageSize: Int) = "v2/top-headlines"
+        .httpGet(listOf("sources" to source.ifEmpty { "medical-news-today" }))
         .readResult<List<News>>(context = context, key = "articles")
 
 }
