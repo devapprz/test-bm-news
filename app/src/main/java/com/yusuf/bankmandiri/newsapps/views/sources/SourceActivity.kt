@@ -49,7 +49,6 @@ class SourceActivity : AppCompatActivity() {
                         SearchInput(
                             isSearch = isSearch,
                             textSearch = textSearch,
-                            delay = 0,
                             onClose = {
                                 sourceViewModel.find(null)
                             }
