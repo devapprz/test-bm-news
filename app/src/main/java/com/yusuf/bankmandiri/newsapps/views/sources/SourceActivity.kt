@@ -25,6 +25,7 @@ import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.sources.SourceViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SourceActivity : AppCompatActivity() {
@@ -142,6 +143,15 @@ class SourceActivity : AppCompatActivity() {
                 block = { mSourceJob = sourceViewModel.findAll(category = category) })
 
         }
+    }
+
+    override fun onDestroy() {
+        mSourceJob?.runCatching {
+            if (isActive) cancel()
+        }?.onFailure {
+            Timber.tag("SOURCE").d(it.localizedMessage)
+        }
+        super.onDestroy()
     }
 
 }
