@@ -185,7 +185,7 @@ class NewsActivity : AppCompatActivity() {
                 if (!message.isNullOrEmpty()) {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message,
-                        "Error",
+                        "Close",
                         SnackbarDuration.Long
                     )
                 }
