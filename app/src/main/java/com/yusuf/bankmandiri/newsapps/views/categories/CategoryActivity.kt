@@ -34,7 +34,7 @@ import timber.log.Timber
 @AndroidEntryPoint
 class CategoryActivity : AppCompatActivity() {
 
-    private var categoryJob: Job? = null
+    private var mCategoryJob: Job? = null
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +80,7 @@ class CategoryActivity : AppCompatActivity() {
                     state = swipeState,
                     modifier = Modifier.fillMaxSize(),
                     onRefresh = {
-                        categoryJob = categoryViewModel.findAll()
+                        mCategoryJob = categoryViewModel.findAll()
                     }
                 ) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -150,12 +150,12 @@ class CategoryActivity : AppCompatActivity() {
             LaunchedEffect(key1 = categoryState.isLoading, block = {
                 swipeState.isRefreshing = categoryState.isLoading
             })
-            LaunchedEffect(key1 = true, block = { categoryJob = categoryViewModel.findAll() })
+            LaunchedEffect(key1 = true, block = { mCategoryJob = categoryViewModel.findAll() })
         }
     }
 
     override fun onDestroy() {
-        categoryJob?.runCatching {
+        mCategoryJob?.runCatching {
             if (isActive) cancel()
         }?.onFailure {
             Timber.tag("CATEGORY").d(it.localizedMessage)
