@@ -22,7 +22,6 @@ class SourceRepository
     }
 
     fun find(search: String?) = flow {
-        kotlinx.coroutines.delay(1500)
         emit(_sourceCache.filter {
             if (search.isNullOrEmpty()) {
                 true
