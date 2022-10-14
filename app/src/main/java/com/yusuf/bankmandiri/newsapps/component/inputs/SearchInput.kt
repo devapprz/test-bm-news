@@ -77,7 +77,10 @@ fun SearchInput(
             singleLine = true,
             maxLines = 1,
             trailingIcon = {
-                IconButton(onClick = { textSearch.value = "" }) {
+                IconButton(onClick = {
+                    textSearch.value = ""
+                    onChange("")
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_round_clear_24),
                         contentDescription = "Clear"
