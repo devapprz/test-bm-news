@@ -17,7 +17,7 @@ constructor(
 ) {
 
     fun findAll(category: String?) = "v2/top-headlines/sources"
-        .httpGet(listOf("category" to (category?.lowercase().orEmpty().ifEmpty { "technology" })))
+        .httpGet(listOf("category" to (category?.lowercase().orEmpty())))
         .readResult<List<Source>>(context = context, key = "sources")
 
 }

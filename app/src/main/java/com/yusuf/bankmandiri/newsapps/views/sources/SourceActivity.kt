@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -21,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
+import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
 import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.sources.SourceViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +36,8 @@ class SourceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val category = intent?.getStringExtra("CATEGORY")
         setContent {
+            val isSearch = remember { mutableStateOf(false) }
+            val textSearch = remember { mutableStateOf<String?>(null) }
             val sourceViewModel = viewModel<SourceViewModel>()
             val sourceState by sourceViewModel.state.collectAsState()
             val scaffoldState = rememberScaffoldState()
@@ -44,22 +45,45 @@ class SourceActivity : AppCompatActivity() {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(text = "Choose Source")
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        navigationIcon = {
-                            IconButton(onClick = { finish() }) {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_round_arrow_back_ios_24),
-                                    contentDescription = "back"
-                                )
+                    if (isSearch.value) {
+                        SearchInput(
+                            isSearch = isSearch,
+                            textSearch = textSearch,
+                            delay = 0,
+                            onClose = {
+                                sourceViewModel.find(null)
                             }
-                        },
-                        backgroundColor = Color.White,
-                        contentColor = Color.Black
-                    )
+                        ) {
+                            sourceViewModel.find(it)
+                        }
+                    } else {
+                        TopAppBar(
+                            title = {
+                                Text(text = "Choose Source")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) {
+                                    Image(
+                                        painter = painterResource(R.drawable.ic_round_arrow_back_ios_24),
+                                        contentDescription = "back"
+                                    )
+                                }
+                            },
+                            backgroundColor = Color.White,
+                            contentColor = Color.Black,
+                            actions = {
+                                IconButton(onClick = {
+                                    isSearch.value = true
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_round_search_24),
+                                        contentDescription = "Search"
+                                    )
+                                }
+                            }
+                        )
+                    }
                 },
                 scaffoldState = scaffoldState
             ) {
@@ -86,9 +110,7 @@ class SourceActivity : AppCompatActivity() {
                                         onClick = {
                                             setResult(
                                                 200,
-                                                Intent()
-                                                    .putExtra("CATEGORY", category)
-                                                    .putExtra("SOURCE", it.name.orEmpty())
+                                                Intent().putExtra("SOURCE", it.name)
                                             )
                                             finish()
                                         },
@@ -140,7 +162,8 @@ class SourceActivity : AppCompatActivity() {
             })
             LaunchedEffect(
                 key1 = true,
-                block = { mSourceJob = sourceViewModel.findAll(category = category) })
+                block = { mSourceJob = sourceViewModel.findAll(category = category) }
+            )
 
         }
     }

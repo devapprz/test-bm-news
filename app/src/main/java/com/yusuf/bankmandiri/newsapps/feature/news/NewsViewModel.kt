@@ -19,8 +19,8 @@ constructor(
 
     val state = _state.asStateFlow()
 
-    fun find(source: String? = null) = viewModelScope.launch(Dispatchers.IO) {
-        newsRepository.find(source = source, page = 1)
+    fun find(search: String?, source: String) = viewModelScope.launch(Dispatchers.IO) {
+        newsRepository.find(search = search, source = source, page = 1)
             .onStart {
                 _state.update { NewsState(isLoading = true) }
             }
