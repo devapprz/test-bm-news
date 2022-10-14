@@ -23,7 +23,7 @@ constructor() {
     * Note: you can't mix this param with the sources param.
     * */
     fun findAll() = flow {
-        kotlinx.coroutines.delay(3000)
+        kotlinx.coroutines.delay(2000)
         val categories = listOf(
             Category(1, "Business"),
             Category(2, "Entertainment"),
