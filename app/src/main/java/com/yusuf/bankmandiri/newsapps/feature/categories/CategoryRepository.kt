@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 @ViewModelScoped
-class CategoryModel
+class CategoryRepository
 @Inject
 constructor() {
 

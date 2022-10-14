@@ -12,7 +12,7 @@ import javax.inject.Inject
 class CategoryViewModel
 @Inject
 constructor(
-    private val categoryModel: CategoryModel
+    private val categoryRepository: CategoryRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(CategoryState())
@@ -20,7 +20,7 @@ constructor(
     val state = _state.asStateFlow()
 
     fun findAll() = viewModelScope.launch(Dispatchers.IO) {
-        categoryModel.findAll()
+        categoryRepository.findAll()
             .onStart {
                 _state.update { CategoryState(isLoading = true) }
             }
