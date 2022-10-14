@@ -87,7 +87,7 @@ class SourceActivity : AppCompatActivity() {
                                                 200,
                                                 Intent()
                                                     .putExtra("CATEGORY", category)
-                                                    .putExtra("SOURCE", it.id.orEmpty())
+                                                    .putExtra("SOURCE", it.name.orEmpty())
                                             )
                                             finish()
                                         },
