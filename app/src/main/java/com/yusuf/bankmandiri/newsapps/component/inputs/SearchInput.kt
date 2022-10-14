@@ -26,7 +26,7 @@ import java.util.*
 fun SearchInput(
     isSearch: MutableState<Boolean>,
     textSearch: MutableState<String?>,
-    delay: Long = 2000,
+    delay: Long = 1500,
     onClose: () -> Unit = {},
     onChange: (String) -> Unit
 ) {
