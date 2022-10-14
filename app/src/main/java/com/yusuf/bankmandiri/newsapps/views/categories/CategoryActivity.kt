@@ -3,7 +3,9 @@ package com.yusuf.bankmandiri.newsapps.views.categories
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -24,6 +26,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
 import com.yusuf.bankmandiri.newsapps.feature.categories.CategoryViewModel
+import com.yusuf.bankmandiri.newsapps.views.sources.SourceActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import timber.log.Timber
@@ -37,6 +40,16 @@ class CategoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val activityResult = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult(),
+                onResult = { result ->
+                    val code = result.resultCode
+                    if (code == 200) {
+                        setResult(code, result.data)
+                        finish()
+                    }
+                }
+            )
             val categoryViewModel = viewModel<CategoryViewModel>()
             val categoryState by categoryViewModel.state.collectAsState()
             val scaffoldState = rememberScaffoldState()
@@ -96,8 +109,12 @@ class CategoryActivity : AppCompatActivity() {
                             items(items = categoryState.categories.orEmpty()) {
                                 TextButton(
                                     onClick = {
-                                        setResult(200, Intent().putExtra("CATEGORY", it.name))
-                                        finish()
+                                        activityResult.launch(
+                                            Intent(
+                                                this@CategoryActivity,
+                                                SourceActivity::class.java
+                                            ).putExtra("CATEGORY", it.name)
+                                        )
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth(),
