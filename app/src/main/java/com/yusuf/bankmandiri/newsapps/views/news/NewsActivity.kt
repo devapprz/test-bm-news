@@ -100,7 +100,12 @@ class NewsActivity : AppCompatActivity() {
                                     items(items = newsState.news.orEmpty()) {
                                         TextButton(
                                             onClick = {
-
+                                                startActivity(
+                                                    Intent(
+                                                        this@NewsActivity,
+                                                        NewsDetailActivity::class.java
+                                                    ).putExtra("URL", it.url)
+                                                )
                                             },
                                             modifier = Modifier
                                                 .fillMaxWidth(),
