@@ -16,6 +16,10 @@ class BaseApplication : Application() {
 
         with(FuelManager.instance){
             basePath = BuildConfig.API_URL
+            baseHeaders = mapOf(
+                "Content-Type" to "application/json; charset=utf-8",
+                "User-Agent" to "Mozilla/5.0"
+            )
         }
     }
 
