@@ -21,5 +21,11 @@ inline fun <reified T> Request.readResult(context: Context, key: String) = flow 
     require(statusMessage.isEmpty()) { "Error ${payloadJson.optString("message", statusMessage)}" }
     val typeToken = object : TypeToken<T>() {}.type
     val injector = EntryPointAccessors.fromApplication(context, SingletonInjector::class.java)
-    emit(ResponseWrapper("ok", null, injector.gson.fromJson<T>(payloadJson.optString(key), typeToken)))
+    emit(
+        ResponseWrapper(
+            "ok",
+            null,
+            injector.gson.fromJson<T>(payloadJson.optString(key), typeToken)
+        )
+    )
 }
