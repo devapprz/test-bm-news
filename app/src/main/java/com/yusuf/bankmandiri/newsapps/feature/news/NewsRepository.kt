@@ -17,7 +17,6 @@ constructor(
     fun findAll(search: String?, source: String, pageSize: Int) = object : PagingSource<Int, News>() {
         override fun getRefreshKey(state: PagingState<Int, News>): Int? = null
 
-        @Suppress("RemoveExplicitTypeArguments")
         override suspend fun load(params: LoadParams<Int>) = params.runCatching {
             val currentPage = key ?: 1
             val result = newsRemote.find(
@@ -38,7 +37,7 @@ constructor(
                 LoadResult.Page(data = resultData, prevKey = prevKey, nextKey = nextKey)
             }
         }.getOrElse {
-            LoadResult.Error<Int, News>(it)
+            LoadResult.Error(it)
         }
     }
 
