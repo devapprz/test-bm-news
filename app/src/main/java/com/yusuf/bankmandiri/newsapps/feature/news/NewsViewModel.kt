@@ -2,10 +2,14 @@ package com.yusuf.bankmandiri.newsapps.feature.news
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,17 +23,17 @@ constructor(
 
     val state = _state.asStateFlow()
 
-    fun find(search: String?, source: String) = viewModelScope.launch(Dispatchers.IO) {
-        newsRepository.find(search = search, source = source, page = 1)
-            .onStart {
-                _state.update { NewsState(isLoading = true) }
-            }
-            .catch { error ->
-                _state.update { NewsState(messages = error.message) }
-            }
-            .collectLatest { collect ->
-                _state.update { NewsState(news = collect.result.orEmpty()) }
-            }
+    fun findMock(search: String?, source: String, pageSize: Int) =
+        Pager(config = PagingConfig(pageSize = pageSize))
+        { newsRepository.find(search = search, source = source, pageSize = pageSize) }
+            .flow
+            .cachedIn(viewModelScope)
+
+    fun showError(error: Throwable?) {
+        error?.apply {
+            Timber.tag("RZ_").v(this)
+            _state.update { NewsState(messages = error.message) }
+        }
     }
 
 }
