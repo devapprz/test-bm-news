@@ -128,6 +128,7 @@ class NewsActivity : AppCompatActivity() {
                                                         this@NewsActivity,
                                                         NewsDetailActivity::class.java
                                                     ).putExtra("URL", it.url)
+                                                        .putExtra("NAME", it.source?.name)
                                                 )
                                             },
                                             modifier = Modifier
