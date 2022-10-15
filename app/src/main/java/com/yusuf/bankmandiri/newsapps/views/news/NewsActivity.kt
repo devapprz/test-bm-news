@@ -52,7 +52,7 @@ class NewsActivity : AppCompatActivity() {
             var source by remember { mutableStateOf(CommonConstant.DEFAULT_SOURCE) }
             val newsViewModel = viewModel<NewsViewModel>()
             val newsState by newsViewModel.state.collectAsState()
-            val newsPage = newsViewModel.findMock(search, source, 4).collectAsLazyPagingItems()
+            val newsPage = newsViewModel.findALl(search, source, 4).collectAsLazyPagingItems()
             val scaffoldState = rememberScaffoldState()
             val swipeState = rememberSwipeRefreshState(isRefreshing = false)
             val filterLauncher = rememberLauncherForActivityResult(

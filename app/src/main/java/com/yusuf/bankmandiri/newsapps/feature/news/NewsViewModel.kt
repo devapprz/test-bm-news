@@ -23,9 +23,9 @@ constructor(
 
     val state = _state.asStateFlow()
 
-    fun findMock(search: String?, source: String, pageSize: Int) =
+    fun findALl(search: String?, source: String, pageSize: Int) =
         Pager(config = PagingConfig(pageSize = pageSize))
-        { newsRepository.find(search = search, source = source, pageSize = pageSize) }
+        { newsRepository.findAll(search = search, source = source, pageSize = pageSize) }
             .flow
             .cachedIn(viewModelScope)
 

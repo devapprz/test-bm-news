@@ -14,7 +14,7 @@ constructor(
     private val newsRemote: NewsRemote
 ) {
 
-    fun find(search: String?, source: String, pageSize: Int) = object : PagingSource<Int, News>() {
+    fun findAll(search: String?, source: String, pageSize: Int) = object : PagingSource<Int, News>() {
         override fun getRefreshKey(state: PagingState<Int, News>): Int? = null
 
         @Suppress("RemoveExplicitTypeArguments")
