@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -16,20 +15,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
 import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
-import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.sources.SourceViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
-import timber.log.Timber
 
 @AndroidEntryPoint
 class SourceActivity : AppCompatActivity() {
-
-    private var mSourceJob: Job? = null
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,25 +33,17 @@ class SourceActivity : AppCompatActivity() {
         val category = intent?.getStringExtra("CATEGORY")
         setContent {
             val isSearch = remember { mutableStateOf(false) }
-            val textSearch = remember { mutableStateOf<String?>(null) }
+            var search by remember { mutableStateOf<String?>(null) }
             val sourceViewModel = viewModel<SourceViewModel>()
             val sourceState by sourceViewModel.state.collectAsState()
+            val sourcePage = sourceViewModel.findAll(category, search).collectAsLazyPagingItems()
             val scaffoldState = rememberScaffoldState()
             val swipeState = rememberSwipeRefreshState(isRefreshing = false)
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
                     if (isSearch.value) {
-                        SearchInput(
-                            isSearch = isSearch,
-                            textSearch = textSearch,
-                            delay = 0,
-                            onClose = {
-                                sourceViewModel.find(null)
-                            }
-                        ) {
-                            sourceViewModel.find(it)
-                        }
+                        SearchInput(isSearch = isSearch) { search = it }
                     } else {
                         TopAppBar(
                             title = {
@@ -90,55 +78,43 @@ class SourceActivity : AppCompatActivity() {
                 SwipeRefresh(
                     state = swipeState,
                     modifier = Modifier.fillMaxSize(),
-                    onRefresh = {
-                        mSourceJob = sourceViewModel.findAll(category = category)
-                    }
+                    onRefresh = { sourcePage.refresh() }
                 ) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        if (sourceState.isLoading) {
-                            item {
-                                LoadMessage(message = "Please wait for the sources to finish loading")
-                            }
-                        } else {
-                            if (sourceState.sources.isNullOrEmpty()) {
-                                item {
-                                    LoadMessage(message = "No Data Found !\n\nYou can swipe down to refresh")
-                                }
-                            } else {
-                                items(items = sourceState.sources.orEmpty()) {
-                                    TextButton(
-                                        onClick = {
-                                            setResult(
-                                                200,
-                                                Intent().putExtra("SOURCE", it.name)
-                                            )
-                                            finish()
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
-                                    ) {
-                                        Image(
-                                            painter = painterResource(R.drawable.ic_round_arrow_right_24),
-                                            contentDescription = "back"
+                        items(items = sourcePage) {
+                            it?.also { data ->
+                                TextButton(
+                                    onClick = {
+                                        setResult(
+                                            200,
+                                            Intent().putExtra("SOURCE", data.name)
                                         )
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxWidth()
+                                        finish()
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+                                ) {
+                                    Image(
+                                        painter = painterResource(R.drawable.ic_round_arrow_right_24),
+                                        contentDescription = "back"
+                                    )
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = data.name.orEmpty(),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Spacer(modifier = Modifier.padding(vertical = 4.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            Text(
-                                                text = it.name.orEmpty(),
-                                                modifier = Modifier.fillMaxWidth()
-                                            )
-                                            Spacer(modifier = Modifier.padding(vertical = 4.dp))
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
-                                                Text(text = it.category.orEmpty())
-                                                Text(text = "Country : ${it.country.orEmpty()}")
-                                            }
+                                            Text(text = data.category.orEmpty())
+                                            Text(text = "Country : ${data.country.orEmpty()}")
                                         }
                                     }
                                 }
@@ -157,24 +133,7 @@ class SourceActivity : AppCompatActivity() {
                     )
                 }
             }
-            LaunchedEffect(key1 = sourceState.isLoading, block = {
-                swipeState.isRefreshing = sourceState.isLoading
-            })
-            LaunchedEffect(
-                key1 = true,
-                block = { mSourceJob = sourceViewModel.findAll(category = category) }
-            )
-
         }
-    }
-
-    override fun onDestroy() {
-        mSourceJob?.runCatching {
-            if (isActive) cancel()
-        }?.onFailure {
-            Timber.tag("SOURCE").d(it.localizedMessage)
-        }
-        super.onDestroy()
     }
 
 }
