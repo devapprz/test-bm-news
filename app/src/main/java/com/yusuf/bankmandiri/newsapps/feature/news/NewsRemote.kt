@@ -3,7 +3,6 @@ package com.yusuf.bankmandiri.newsapps.feature.news
 import android.content.Context
 import com.github.kittinunf.fuel.httpGet
 import com.yusuf.bankmandiri.newsapps.feature.news.data.News
-import com.yusuf.bankmandiri.newsapps.utils.ResponseWrapper
 import com.yusuf.bankmandiri.newsapps.utils.readResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -103,14 +102,9 @@ constructor(
         mFirstData += (if (page == 0) 0 else pageSize)
         mLastData += (if (page == 0) (pageSize - 1) else pageSize)
         Timber.tag("RZ_").v("Data from : $mFirstData, to : $mLastData")
-        val result = ResponseWrapper(
-            status = "ok",
-            message = null,
-            _newsMock.slice(mFirstData..mLastData).map {
-                it.copy(urlToImage = "https://cdn.pixabay.com/photo/2012/08/27/14/19/mountains-55067__340.png")
-            }
-        )
-        emit(result)
+        emit(_newsMock.slice(mFirstData..mLastData).map {
+            it.copy(urlToImage = "https://cdn.pixabay.com/photo/2012/08/27/14/19/mountains-55067__340.png")
+        })
     }
 
 }

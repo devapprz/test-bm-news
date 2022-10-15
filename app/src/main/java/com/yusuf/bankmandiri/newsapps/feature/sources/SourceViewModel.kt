@@ -29,7 +29,7 @@ constructor(
                 _state.update { SourceState(messages = error.message) }
             }
             .collectLatest { collect ->
-                _state.update { SourceState(sources = collect.result.orEmpty()) }
+                _state.update { SourceState(sources = collect) }
             }
     }
 

@@ -1,7 +1,6 @@
 package com.yusuf.bankmandiri.newsapps.feature.categories
 
 import com.yusuf.bankmandiri.newsapps.feature.categories.data.Category
-import com.yusuf.bankmandiri.newsapps.utils.ResponseWrapper
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -33,7 +32,7 @@ constructor() {
             Category(6, "Sports"),
             Category(7, "Technology"),
         )
-        emit(ResponseWrapper(status = "ok", message = null, categories))
+        emit(categories)
     }
 
 }

@@ -28,7 +28,7 @@ constructor(
                 page = currentPage,
                 pageSize = pageSize
             ).last()
-            val resultData = result.result.orEmpty()
+            val resultData = result.orEmpty()
             val endOfPaginationReached = resultData.size != pageSize
             if (resultData.isEmpty()) {
                 LoadResult.Page<Int, News>(data = emptyList(), prevKey = null, nextKey = null)
