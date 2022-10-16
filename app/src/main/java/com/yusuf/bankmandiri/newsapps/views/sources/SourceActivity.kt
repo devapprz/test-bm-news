@@ -22,6 +22,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
 import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
+import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.sources.SourceViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -89,13 +90,13 @@ class SourceActivity : AppCompatActivity() {
                             val error = (loadState.source.refresh as LoadState.Error).error
                             viewModel.showError(error)
                         }
-                        items(items = pageItems) {
-                            it?.also { data ->
+                        items(items = pageItems) { source ->
+                            if (source != null) {
                                 TextButton(
                                     onClick = {
                                         setResult(
                                             200,
-                                            Intent().putExtra("SOURCE", data.name)
+                                            Intent().putExtra("SOURCE", source.name)
                                         )
                                         finish()
                                     },
@@ -113,7 +114,7 @@ class SourceActivity : AppCompatActivity() {
                                             .fillMaxWidth()
                                     ) {
                                         Text(
-                                            text = data.name.orEmpty(),
+                                            text = source.name.orEmpty(),
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                         Spacer(modifier = Modifier.padding(vertical = 4.dp))
@@ -121,11 +122,13 @@ class SourceActivity : AppCompatActivity() {
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            Text(text = data.category.orEmpty())
-                                            Text(text = "Country : ${data.country.orEmpty()}")
+                                            Text(text = source.category.orEmpty())
+                                            Text(text = "Country : ${source.country.orEmpty()}")
                                         }
                                     }
                                 }
+                            } else {
+                                LoadMessage(message = "No Data Found !\n\nYou can swipe down to refresh")
                             }
                         }
                     }

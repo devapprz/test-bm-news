@@ -33,6 +33,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
 import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
+import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.news.NewsViewModel
 import com.yusuf.bankmandiri.newsapps.utils.CommonConstant
 import com.yusuf.bankmandiri.newsapps.utils.toLocalDate
@@ -105,7 +106,7 @@ class NewsActivity : AppCompatActivity() {
                                 viewModel.showError(error)
                             }
                             items(items = pageItems) { news ->
-                                news?.apply {
+                                if (news != null) {
                                     TextButton(
                                         onClick = {
                                             startActivity(
@@ -166,10 +167,9 @@ class NewsActivity : AppCompatActivity() {
                                             }
                                         }
                                     }
+                                } else {
+                                    LoadMessage(message = "No Data Found !\n\nYou can swipe down to refresh")
                                 }
-                            }
-                            item {
-
                             }
                         }
                     }
