@@ -24,9 +24,11 @@ constructor(
     private var mLastData = 0
 
     fun findAll(category: String?, search: String?, page: Int, pageSize: Int) = flow {
-        if (page == 0) {
+        if (!search.isNullOrEmpty() || page == 0) {
             mFirstData = 0
             mLastData = 0
+        }
+        if (page == 0) {
             val result = "v2/top-headlines/sources"
                 .httpGet(listOf("category" to (category.orEmpty().lowercase())))
                 .readResult<List<Source>>(context = context, key = "sources")
@@ -39,13 +41,20 @@ constructor(
         }
         mFirstData += (if (page == 0) 0 else pageSize)
         mLastData += (if (page == 0) (pageSize - 1) else pageSize)
-        emit(_temp.filter {
+        val result = _temp.filter {
             if (search.isNullOrEmpty()) {
                 true
             } else {
-                it.name?.lowercase()?.contains(search.lowercase()) == true
+                it.name // find by name
+                    .orEmpty() // if data is null set as empty string
+                    .lowercase() // avoid upper case
+                    .contains(search.lowercase()) // find data by close text
             }
-        }.slice(mFirstData..mLastData))
+        }.runCatching {
+            require(isNotEmpty())
+            slice(mFirstData..mLastData)
+        }.getOrDefault(emptyList())
+        emit(result)
     }
 
 }

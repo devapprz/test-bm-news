@@ -22,6 +22,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
 import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
+import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.sources.SourceViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,9 +36,9 @@ class SourceActivity : AppCompatActivity() {
         setContent {
             val isSearch = remember { mutableStateOf(false) }
             var search by remember { mutableStateOf<String?>(null) }
-            val sourceViewModel = viewModel<SourceViewModel>()
-            val sourceState by sourceViewModel.state.collectAsState()
-            val sourcePage = sourceViewModel.findAll(category, search).collectAsLazyPagingItems()
+            val viewModel = viewModel<SourceViewModel>()
+            val state by viewModel.state.collectAsState()
+            val pageItems = viewModel.findAll(category, search).collectAsLazyPagingItems()
             val scaffoldState = rememberScaffoldState()
             val swipeState = rememberSwipeRefreshState(isRefreshing = false)
             Scaffold(
@@ -79,23 +80,23 @@ class SourceActivity : AppCompatActivity() {
                 SwipeRefresh(
                     state = swipeState,
                     modifier = Modifier.fillMaxSize(),
-                    onRefresh = { sourcePage.refresh() }
+                    onRefresh = { pageItems.refresh() }
                 ) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        val state = sourcePage.loadState
+                        val loadState = pageItems.loadState
                         swipeState.isRefreshing =
-                            state.refresh is LoadState.Loading || state.append is LoadState.Loading
-                        if (state.source.refresh is LoadState.Error) {
-                            val error = (state.source.refresh as LoadState.Error).error
-                            sourceViewModel.showError(error)
+                            loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading
+                        if (loadState.source.refresh is LoadState.Error) {
+                            val error = (loadState.source.refresh as LoadState.Error).error
+                            viewModel.showError(error)
                         }
-                        items(items = sourcePage) {
-                            it?.also { data ->
+                        items(items = pageItems) { source ->
+                            if (source != null) {
                                 TextButton(
                                     onClick = {
                                         setResult(
                                             200,
-                                            Intent().putExtra("SOURCE", data.name)
+                                            Intent().putExtra("SOURCE", source.name)
                                         )
                                         finish()
                                     },
@@ -113,7 +114,7 @@ class SourceActivity : AppCompatActivity() {
                                             .fillMaxWidth()
                                     ) {
                                         Text(
-                                            text = data.name.orEmpty(),
+                                            text = source.name.orEmpty(),
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                         Spacer(modifier = Modifier.padding(vertical = 4.dp))
@@ -121,18 +122,20 @@ class SourceActivity : AppCompatActivity() {
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            Text(text = data.category.orEmpty())
-                                            Text(text = "Country : ${data.country.orEmpty()}")
+                                            Text(text = source.category.orEmpty())
+                                            Text(text = "Country : ${source.country.orEmpty()}")
                                         }
                                     }
                                 }
+                            } else {
+                                LoadMessage(message = "No Data Found !\n\nYou can swipe down to refresh")
                             }
                         }
                     }
                 }
             }
-            LaunchedEffect(key1 = sourceState.messages) {
-                val message = sourceState.messages
+            LaunchedEffect(key1 = state.messages) {
+                val message = state.messages
                 if (!message.isNullOrEmpty()) {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message,

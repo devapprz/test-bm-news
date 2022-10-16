@@ -33,6 +33,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yusuf.bankmandiri.newsapps.R
 import com.yusuf.bankmandiri.newsapps.component.inputs.SearchInput
+import com.yusuf.bankmandiri.newsapps.component.lists.LoadMessage
 import com.yusuf.bankmandiri.newsapps.feature.news.NewsViewModel
 import com.yusuf.bankmandiri.newsapps.utils.CommonConstant
 import com.yusuf.bankmandiri.newsapps.utils.toLocalDate
@@ -49,9 +50,9 @@ class NewsActivity : AppCompatActivity() {
             val isSearch = remember { mutableStateOf(false) }
             var search by remember { mutableStateOf<String?>(null) }
             var source by remember { mutableStateOf(CommonConstant.DEFAULT_SOURCE) }
-            val newsViewModel = viewModel<NewsViewModel>()
-            val newsState by newsViewModel.state.collectAsState()
-            val newsPage = newsViewModel.findALl(search, source, 4).collectAsLazyPagingItems()
+            val viewModel = viewModel<NewsViewModel>()
+            val state by viewModel.state.collectAsState()
+            val pageItems = viewModel.findALl(search, source, 4).collectAsLazyPagingItems()
             val scaffoldState = rememberScaffoldState()
             val swipeState = rememberSwipeRefreshState(isRefreshing = false)
             val filterLauncher = rememberLauncherForActivityResult(
@@ -92,20 +93,20 @@ class NewsActivity : AppCompatActivity() {
                     SwipeRefresh(
                         modifier = Modifier.fillMaxSize(),
                         state = swipeState,
-                        onRefresh = { newsPage.refresh() }
+                        onRefresh = { pageItems.refresh() }
                     ) {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            val state = newsPage.loadState
+                            val loadState = pageItems.loadState
                             swipeState.isRefreshing =
-                                state.refresh is LoadState.Loading || state.append is LoadState.Loading
-                            if (state.source.refresh is LoadState.Error) {
-                                val error = (state.source.refresh as LoadState.Error).error
-                                newsViewModel.showError(error)
+                                loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading
+                            if (loadState.source.refresh is LoadState.Error) {
+                                val error = (loadState.source.refresh as LoadState.Error).error
+                                viewModel.showError(error)
                             }
-                            items(items = newsPage) { news ->
-                                news?.apply {
+                            items(items = pageItems) { news ->
+                                if (news != null) {
                                     TextButton(
                                         onClick = {
                                             startActivity(
@@ -166,10 +167,9 @@ class NewsActivity : AppCompatActivity() {
                                             }
                                         }
                                     }
+                                } else {
+                                    LoadMessage(message = "No Data Found !\n\nYou can swipe down to refresh")
                                 }
-                            }
-                            item {
-
                             }
                         }
                     }
@@ -201,8 +201,8 @@ class NewsActivity : AppCompatActivity() {
                     }
                 }
             }
-            LaunchedEffect(key1 = newsState.messages) {
-                val message = newsState.messages
+            LaunchedEffect(key1 = state.messages) {
+                val message = state.messages
                 if (!message.isNullOrEmpty()) {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message,

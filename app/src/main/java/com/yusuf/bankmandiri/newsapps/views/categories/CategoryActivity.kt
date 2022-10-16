@@ -34,7 +34,7 @@ import timber.log.Timber
 @AndroidEntryPoint
 class CategoryActivity : AppCompatActivity() {
 
-    private var mCategoryJob: Job? = null
+    private var job: Job? = null
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,8 +50,8 @@ class CategoryActivity : AppCompatActivity() {
                     }
                 }
             )
-            val categoryViewModel = viewModel<CategoryViewModel>()
-            val categoryState by categoryViewModel.state.collectAsState()
+            val viewModel = viewModel<CategoryViewModel>()
+            val state by viewModel.state.collectAsState()
             val scaffoldState = rememberScaffoldState()
             val swipeState = rememberSwipeRefreshState(isRefreshing = false)
             Scaffold(
@@ -80,12 +80,12 @@ class CategoryActivity : AppCompatActivity() {
                     state = swipeState,
                     modifier = Modifier.fillMaxSize(),
                     onRefresh = {
-                        mCategoryJob = categoryViewModel.findAll()
+                        job = viewModel.findAll()
                     }
                 ) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        if (categoryState.categories.isNullOrEmpty()) {
-                            val message = if (categoryState.isLoading) {
+                        if (state.categories.isNullOrEmpty()) {
+                            val message = if (state.isLoading) {
                                 "Please wait for the category to finish loading"
                             } else {
                                 "No Data Found !\n\nYou can swipe down to refresh"
@@ -106,7 +106,7 @@ class CategoryActivity : AppCompatActivity() {
                                 }
                             }
                         } else {
-                            items(items = categoryState.categories.orEmpty()) {
+                            items(items = state.categories.orEmpty()) {
                                 TextButton(
                                     onClick = {
                                         activityResult.launch(
@@ -137,8 +137,8 @@ class CategoryActivity : AppCompatActivity() {
                     }
                 }
             }
-            LaunchedEffect(key1 = categoryState.messages) {
-                val message = categoryState.messages
+            LaunchedEffect(key1 = state.messages) {
+                val message = state.messages
                 if (!message.isNullOrEmpty()) {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message,
@@ -147,15 +147,15 @@ class CategoryActivity : AppCompatActivity() {
                     )
                 }
             }
-            LaunchedEffect(key1 = categoryState.isLoading, block = {
-                swipeState.isRefreshing = categoryState.isLoading
+            LaunchedEffect(key1 = state.isLoading, block = {
+                swipeState.isRefreshing = state.isLoading
             })
-            LaunchedEffect(key1 = true, block = { mCategoryJob = categoryViewModel.findAll() })
+            LaunchedEffect(key1 = true, block = { job = viewModel.findAll() })
         }
     }
 
     override fun onDestroy() {
-        mCategoryJob?.runCatching {
+        job?.runCatching {
             if (isActive) cancel()
         }?.onFailure {
             Timber.tag("CATEGORY").d(it.localizedMessage)
