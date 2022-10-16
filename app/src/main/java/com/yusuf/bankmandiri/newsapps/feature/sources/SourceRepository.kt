@@ -18,7 +18,8 @@ class SourceRepository
             override fun getRefreshKey(state: PagingState<Int, Source>): Int? = null
 
             override suspend fun load(params: LoadParams<Int>) = params.runCatching {
-                val currentPage = key ?: 1
+                val firstPage = 0
+                val currentPage = key ?: firstPage
                 val result = sourceRemote.findAll(
                     category = category,
                     page = currentPage,
@@ -29,7 +30,7 @@ class SourceRepository
                 if (result.isEmpty()) {
                     LoadResult.Page<Int, Source>(data = emptyList(), prevKey = null, nextKey = null)
                 } else {
-                    val prevKey = if (currentPage == 1) null else currentPage - 1
+                    val prevKey = if (currentPage == firstPage) null else currentPage - 1
                     val nextKey = if (endOfPaginationReached) null else currentPage + 1
                     LoadResult.Page(data = result, prevKey = prevKey, nextKey = nextKey)
                 }
