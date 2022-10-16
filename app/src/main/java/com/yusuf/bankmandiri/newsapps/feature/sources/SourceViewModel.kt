@@ -25,7 +25,7 @@ constructor(
 
     fun findAll(category: String?, search: String?) =
         Pager(config = PagingConfig(pageSize = 4))
-        { sourceRepository.findAll(category, search = search, pageSize = 4) }
+        { sourceRepository.findAll(category, search = search, pageSize = 12) }
             .flow
             .cachedIn(viewModelScope)
 
