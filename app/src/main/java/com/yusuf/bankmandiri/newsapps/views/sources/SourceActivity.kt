@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -81,6 +82,13 @@ class SourceActivity : AppCompatActivity() {
                     onRefresh = { sourcePage.refresh() }
                 ) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        val state = sourcePage.loadState
+                        swipeState.isRefreshing =
+                            state.refresh is LoadState.Loading || state.append is LoadState.Loading
+                        if (state.source.refresh is LoadState.Error) {
+                            val error = (state.source.refresh as LoadState.Error).error
+                            sourceViewModel.showError(error)
+                        }
                         items(items = sourcePage) {
                             it?.also { data ->
                                 TextButton(
