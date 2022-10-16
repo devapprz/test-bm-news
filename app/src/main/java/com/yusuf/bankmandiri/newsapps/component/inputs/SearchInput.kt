@@ -76,6 +76,7 @@ fun SearchInput(
             maxLines = 1,
             trailingIcon = {
                 IconButton(onClick = {
+                    text = ""
                     onChanged("")
                 }) {
                     Icon(
