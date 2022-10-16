@@ -18,7 +18,8 @@ constructor(
         override fun getRefreshKey(state: PagingState<Int, News>): Int? = null
 
         override suspend fun load(params: LoadParams<Int>) = params.runCatching {
-            val currentPage = key ?: 1
+            val firstPage = 1
+            val currentPage = key ?: firstPage
             val result = newsRemote.find(
                 search = search,
                 source = source
@@ -32,7 +33,7 @@ constructor(
             if (resultData.isEmpty()) {
                 LoadResult.Page<Int, News>(data = emptyList(), prevKey = null, nextKey = null)
             } else {
-                val prevKey = if (currentPage == 1) null else currentPage - 1
+                val prevKey = if (currentPage == firstPage) null else currentPage - 1
                 val nextKey = if (endOfPaginationReached) null else currentPage + 1
                 LoadResult.Page(data = resultData, prevKey = prevKey, nextKey = nextKey)
             }
