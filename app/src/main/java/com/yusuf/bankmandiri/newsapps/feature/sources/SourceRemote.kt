@@ -41,7 +41,7 @@ constructor(
         }
         mFirstData += (if (page == 0) 0 else pageSize)
         mLastData += (if (page == 0) (pageSize - 1) else pageSize)
-        val result = _temp.filter {
+        val data = _temp.filter {
             if (search.isNullOrEmpty()) {
                 true
             } else {
@@ -50,10 +50,11 @@ constructor(
                     .lowercase() // avoid upper case
                     .contains(search.lowercase()) // find data by close text
             }
-        }.runCatching {
+        }
+        val result = data.runCatching {
             require(isNotEmpty())
             slice(mFirstData..mLastData)
-        }.getOrDefault(emptyList())
+        }.getOrDefault(data)
         emit(result)
     }
 
