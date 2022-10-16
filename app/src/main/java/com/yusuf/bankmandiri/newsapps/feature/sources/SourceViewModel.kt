@@ -8,6 +8,8 @@ import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,5 +28,12 @@ constructor(
         { sourceRepository.findAll(category, search = search, pageSize = 4) }
             .flow
             .cachedIn(viewModelScope)
+
+    fun showError(error: Throwable?) {
+        error?.apply {
+            Timber.tag("RZ_").v(this)
+            _state.update { SourceState(messages = error.message) }
+        }
+    }
 
 }
