@@ -35,9 +35,9 @@ class SourceActivity : AppCompatActivity() {
         setContent {
             val isSearch = remember { mutableStateOf(false) }
             var search by remember { mutableStateOf<String?>(null) }
-            val sourceViewModel = viewModel<SourceViewModel>()
-            val sourceState by sourceViewModel.state.collectAsState()
-            val sourcePage = sourceViewModel.findAll(category, search).collectAsLazyPagingItems()
+            val viewModel = viewModel<SourceViewModel>()
+            val state by viewModel.state.collectAsState()
+            val pageItems = viewModel.findAll(category, search).collectAsLazyPagingItems()
             val scaffoldState = rememberScaffoldState()
             val swipeState = rememberSwipeRefreshState(isRefreshing = false)
             Scaffold(
@@ -79,17 +79,17 @@ class SourceActivity : AppCompatActivity() {
                 SwipeRefresh(
                     state = swipeState,
                     modifier = Modifier.fillMaxSize(),
-                    onRefresh = { sourcePage.refresh() }
+                    onRefresh = { pageItems.refresh() }
                 ) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        val state = sourcePage.loadState
+                        val loadState = pageItems.loadState
                         swipeState.isRefreshing =
-                            state.refresh is LoadState.Loading || state.append is LoadState.Loading
-                        if (state.source.refresh is LoadState.Error) {
-                            val error = (state.source.refresh as LoadState.Error).error
-                            sourceViewModel.showError(error)
+                            loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading
+                        if (loadState.source.refresh is LoadState.Error) {
+                            val error = (loadState.source.refresh as LoadState.Error).error
+                            viewModel.showError(error)
                         }
-                        items(items = sourcePage) {
+                        items(items = pageItems) {
                             it?.also { data ->
                                 TextButton(
                                     onClick = {
@@ -131,8 +131,8 @@ class SourceActivity : AppCompatActivity() {
                     }
                 }
             }
-            LaunchedEffect(key1 = sourceState.messages) {
-                val message = sourceState.messages
+            LaunchedEffect(key1 = state.messages) {
+                val message = state.messages
                 if (!message.isNullOrEmpty()) {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message,
