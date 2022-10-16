@@ -10,7 +10,7 @@ import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.flow
 import org.json.JSONObject
 
-inline fun <reified T> Request.readResult(context: Context, key: String) = flow {
+inline fun <reified T> Request.readResult(context: Context, key: String) = flow<T?> {
     parameters = parameters + listOf("apiKey" to BuildConfig.API_KEY)
     val (_, res, data) = awaitStringResponseResult()
     require(res.isSuccessful) { res.responseMessage }
@@ -21,5 +21,5 @@ inline fun <reified T> Request.readResult(context: Context, key: String) = flow 
     require(statusMessage.isEmpty()) { "Error ${payloadJson.optString("message", statusMessage)}" }
     val typeToken = object : TypeToken<T>() {}.type
     val injector = EntryPointAccessors.fromApplication(context, SingletonInjector::class.java)
-    emit(ResponseWrapper("ok", null, injector.gson.fromJson<T>(payloadJson.optString(key), typeToken)))
+    emit(injector.gson.fromJson(payloadJson.optString(key), typeToken))
 }

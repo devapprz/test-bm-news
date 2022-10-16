@@ -28,7 +28,7 @@ constructor(
                 _state.update { CategoryState(messages = error.message) }
             }
             .collectLatest { collect ->
-                _state.update { CategoryState(categories = collect.result.orEmpty()) }
+                _state.update { CategoryState(categories = collect) }
             }
     }
 

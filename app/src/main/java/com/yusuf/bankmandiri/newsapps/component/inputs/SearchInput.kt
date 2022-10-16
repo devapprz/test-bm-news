@@ -25,11 +25,10 @@ import java.util.*
 @Composable
 fun SearchInput(
     isSearch: MutableState<Boolean>,
-    textSearch: MutableState<String?>,
     delay: Long = 1500,
-    onClose: () -> Unit = {},
-    onChange: (String) -> Unit
+    onChanged: (String) -> Unit
 ) {
+    var text by remember { mutableStateOf<String?>(null) }
     var timer by remember { mutableStateOf<Timer?>(null) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -42,7 +41,8 @@ fun SearchInput(
             modifier = Modifier.padding(horizontal = 8.dp),
             onClick = {
                 isSearch.value = false
-                onClose()
+                text = ""
+                onChanged("")
             }
         ) {
             Icon(
@@ -51,16 +51,14 @@ fun SearchInput(
             )
         }
         OutlinedTextField(
-            value = textSearch.value.orEmpty(),
+            value = text.orEmpty(),
             onValueChange = {
-                textSearch.value = it
+                text = it
                 timer?.cancel()
                 timer = Timer()
                 timer?.schedule(
                     object : TimerTask() {
-                        override fun run() {
-                            onChange(it)
-                        }
+                        override fun run() = onChanged(it)
                     },
                     delay
                 )
@@ -78,8 +76,8 @@ fun SearchInput(
             maxLines = 1,
             trailingIcon = {
                 IconButton(onClick = {
-                    textSearch.value = ""
-                    onChange("")
+                    text = ""
+                    onChanged("")
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_round_clear_24),
