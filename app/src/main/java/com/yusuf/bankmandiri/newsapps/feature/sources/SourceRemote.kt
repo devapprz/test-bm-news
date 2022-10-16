@@ -24,9 +24,9 @@ constructor(
     private var mLastData = 0
 
     fun findAll(category: String?, search: String?, page: Int, pageSize: Int) = flow {
-        mFirstData += (if (page == 0) 0 else pageSize)
-        mLastData += (if (page == 0) (pageSize - 1) else pageSize)
         if (page == 0) {
+            mFirstData = 0
+            mLastData = 0
             val result = "v2/top-headlines/sources"
                 .httpGet(listOf("category" to (category.orEmpty().lowercase())))
                 .readResult<List<Source>>(context = context, key = "sources")
@@ -35,15 +35,17 @@ constructor(
             _temp.clear()
             _temp.addAll(result.orEmpty())
         } else {
-            kotlinx.coroutines.delay(2000)
+            kotlinx.coroutines.delay(1000)
         }
-        emit(_temp.slice(mFirstData..mLastData).filter {
+        mFirstData += (if (page == 0) 0 else pageSize)
+        mLastData += (if (page == 0) (pageSize - 1) else pageSize)
+        emit(_temp.filter {
             if (search.isNullOrEmpty()) {
                 true
             } else {
                 it.name?.lowercase()?.contains(search.lowercase()) == true
             }
-        })
+        }.slice(mFirstData..mLastData))
     }
 
 }
