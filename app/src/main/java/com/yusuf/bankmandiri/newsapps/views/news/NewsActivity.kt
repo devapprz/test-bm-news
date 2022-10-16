@@ -38,7 +38,6 @@ import com.yusuf.bankmandiri.newsapps.utils.CommonConstant
 import com.yusuf.bankmandiri.newsapps.utils.toLocalDate
 import com.yusuf.bankmandiri.newsapps.views.categories.CategoryActivity
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 @AndroidEntryPoint
 class NewsActivity : AppCompatActivity() {
@@ -99,7 +98,6 @@ class NewsActivity : AppCompatActivity() {
                             modifier = Modifier.fillMaxSize()
                         ) {
                             val state = newsPage.loadState
-                            Timber.tag("RZ_").v(state.toString())
                             swipeState.isRefreshing =
                                 state.refresh is LoadState.Loading || state.append is LoadState.Loading
                             if (state.source.refresh is LoadState.Error) {
