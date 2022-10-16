@@ -24,7 +24,7 @@ constructor(
     val state = _state.asStateFlow()
 
     fun findAll(category: String?, search: String?) =
-        Pager(config = PagingConfig(pageSize = 4))
+        Pager(config = PagingConfig(pageSize = 12))
         { sourceRepository.findAll(category, search = search, pageSize = 12) }
             .flow
             .cachedIn(viewModelScope)
