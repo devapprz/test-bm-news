@@ -14,7 +14,7 @@ if (rootProject.file("local.properties").exists()) {
 
 android {
     namespace 'com.yusuf.bankmandiri.newsapps'
-    compileSdk 33
+    compileSdk 34
 
     buildFeatures {
         compose true
@@ -22,7 +22,7 @@ android {
     defaultConfig {
         applicationId "com.yusuf.bankmandiri.newsapps"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "0.0.1"
 
@@ -40,8 +40,8 @@ android {
         }
 
         debug {
-            shrinkResources false
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
